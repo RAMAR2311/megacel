@@ -35,7 +35,23 @@ def main():
             "ALTER TABLE clientes ALTER COLUMN telefono DROP NOT NULL;",
             # Tabla price_approvals
             "ALTER TABLE price_approvals ADD COLUMN IF NOT EXISTS sale_id INTEGER;",
+            # Tabla products (Borrado lógico)
+            "ALTER TABLE products ADD COLUMN IF NOT EXISTS activo BOOLEAN DEFAULT TRUE;",
         ]
+
+        # Soporte para SQLite (donde IF NOT EXISTS en ADD COLUMN puede variar)
+        try:
+            db.session.execute(db.text("ALTER TABLE products ADD COLUMN activo BOOLEAN DEFAULT 1;"))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+
+        # Asegurar que los productos existentes tengan activo = TRUE
+        try:
+            db.session.execute(db.text("UPDATE products SET activo = TRUE WHERE activo IS NULL;"))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
 
         for sql in columnas:
             try:

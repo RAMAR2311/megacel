@@ -277,6 +277,7 @@ def api_search_products():
     # 1. Búsqueda exacta de SKU o código de barras (prioridad máxima para pistolas lectoras)
     exacto = Product.query.filter(
         Product.tipo_inventario == 'tienda',
+        Product.activo == True,
         Product.sku.ilike(query)
     ).first()
     
@@ -285,7 +286,7 @@ def api_search_products():
     tokens_norm = [normalizar_texto(t) for t in tokens]
     
     # Filtro preliminar en SQL con comodín de vocales para optimizar lectura en BD
-    base_query = Product.query.filter(Product.tipo_inventario == 'tienda')
+    base_query = Product.query.filter(Product.tipo_inventario == 'tienda', Product.activo == True)
     for token in tokens:
         wildcard_v = comodin_vocales(token)
         base_query = base_query.filter(
@@ -302,7 +303,7 @@ def api_search_products():
     
     # Si la búsqueda SQL no trajo suficientes por caracteres especiales, incorporar catálogo de tienda
     if len(candidatos) < 5:
-        todos_tienda = Product.query.filter_by(tipo_inventario='tienda').all()
+        todos_tienda = Product.query.filter_by(tipo_inventario='tienda', activo=True).all()
         for p in todos_tienda:
             if p not in candidatos:
                 candidatos.append(p)
@@ -388,16 +389,16 @@ def api_buscar_producto(sku):
     is_admin = (current_user.rol == 'admin')
     
     # 1. Búsqueda exacta
-    producto = Product.query.filter(Product.sku == sku_clean, Product.tipo_inventario == 'tienda').first()
+    producto = Product.query.filter(Product.sku == sku_clean, Product.tipo_inventario == 'tienda', Product.activo == True).first()
     
     # 2. Si no encuentra exacto, intentar case-insensitive
     if not producto:
-        producto = Product.query.filter(Product.sku.ilike(sku_clean), Product.tipo_inventario == 'tienda').first()
+        producto = Product.query.filter(Product.sku.ilike(sku_clean), Product.tipo_inventario == 'tienda', Product.activo == True).first()
         
     # 3. Si aún no, buscar ignorando tildes y mayúsculas en nombre o SKU
     if not producto:
         sku_norm = normalizar_texto(sku_clean)
-        todos_tienda = Product.query.filter_by(tipo_inventario='tienda').all()
+        todos_tienda = Product.query.filter_by(tipo_inventario='tienda', activo=True).all()
         for p in todos_tienda:
             if normalizar_texto(p.sku) == sku_norm or sku_norm in normalizar_texto(p.nombre):
                 producto = p
@@ -750,7 +751,7 @@ def catalogo():
     if query_str:
         # Motor de similitud Case-Insensitive (Like)
         search_term = f"%{query_str}%"
-        productos = Product.query.filter(Product.tipo_inventario == 'tienda').filter(
+        productos = Product.query.filter(Product.tipo_inventario == 'tienda', Product.activo == True).filter(
             or_(
                 Product.sku.ilike(search_term), 
                 Product.nombre.ilike(search_term)
@@ -758,7 +759,7 @@ def catalogo():
         ).limit(50).all()
     else:
         # Límite pasivo de 50 ítems para ahorrar memoria RAM de BD en carga inicial
-        productos = Product.query.filter(Product.tipo_inventario == 'tienda').limit(50).all()
+        productos = Product.query.filter(Product.tipo_inventario == 'tienda', Product.activo == True).limit(50).all()
         
     return render_template('sales/catalogo.html', productos=productos, q=query_str)
 
@@ -767,6 +768,6 @@ def catalogo():
 def caja_visual():
     from models import obtener_hora_bogota
     hoy_bogota = obtener_hora_bogota()
-    productos = Product.query.filter(Product.tipo_inventario == 'tienda').order_by(Product.nombre.asc()).all()
+    productos = Product.query.filter(Product.tipo_inventario == 'tienda', Product.activo == True).order_by(Product.nombre.asc()).all()
     return render_template('sales/caja_visual.html', productos=productos, hoy=hoy_bogota.strftime('%Y-%m-%d'))
 

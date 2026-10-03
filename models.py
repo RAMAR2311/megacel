@@ -44,6 +44,7 @@ class Product(db.Model):
     precio_sugerido = db.Column(db.Numeric(10, 2), nullable=False)
     imagen = db.Column(db.String(255), nullable=True) # Nombre de la foto subida
     observacion = db.Column(db.Text, nullable=True) # Nota descriptiva
+    activo = db.Column(db.Boolean, default=True, server_default='1', nullable=False)
     fecha_creacion = db.Column(db.DateTime, default=obtener_hora_bogota)
     
     

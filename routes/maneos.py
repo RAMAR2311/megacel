@@ -27,7 +27,7 @@ def prestar():
         return redirect(url_for('maneos_bp.index'))
 
     # Buscar el producto o variante por SKU
-    producto = Product.query.filter_by(sku=sku_busqueda).first()
+    producto = Product.query.filter_by(sku=sku_busqueda, activo=True).first()
     variant_id = request.form.get('variant_id')
     variante = None
 

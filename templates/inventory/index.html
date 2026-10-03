@@ -272,7 +272,7 @@
                             </a>
 
                             <!-- Eliminar Producto -->
-                            <form method="POST" action="{{ url_for('inventory_bp.eliminar_producto', id=p.id) }}" class="d-inline m-0 p-0" onsubmit="return confirm('ATENCIÓN: ¿Está seguro de que desea ELIMINAR PERMANENTEMENTE este producto del sistema en la Nube? Esto no se puede deshacer.');">
+                            <form method="POST" action="{{ url_for('inventory_bp.eliminar_producto', id=p.id) }}" class="d-inline m-0 p-0" onsubmit="return confirm('¿Está seguro de que desea eliminar este producto del catálogo? Sus ventas y reportes anteriores se conservarán intactos.');">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" 
                                         class="btn btn-sm btn-light border text-danger rounded-circle p-0 d-inline-flex align-items-center justify-content-center shadow-2xs action-btn-danger-hover" 

@@ -275,7 +275,7 @@ def dashboard():
     ).all()
     unidades_vendidas = sum(d.cantidad_vendida for d in detalles_en_rango)
     referencias_vendidas = len(set(d.product_id for d in detalles_en_rango if d.product_id))
-    total_productos = Product.query.count()
+    total_productos = Product.query.filter(Product.activo == True).count()
 
     # 3. Gastos Operativos del Periodo
     gastos_en_rango = Expense.query.filter(
@@ -314,7 +314,7 @@ def dashboard():
     maneos_activos = Maneo.query.filter_by(estado='PENDIENTE').count()
 
     # 6. Alertas de Stock y Ajustes del Periodo
-    productos_bajo_stock = Product.query.filter(Product.cantidad_stock <= 10).count()
+    productos_bajo_stock = Product.query.filter(Product.activo == True, Product.cantidad_stock <= 10).count()
     ajustes_periodo = StockAdjustment.query.filter(
         StockAdjustment.fecha_ajuste >= inicio_filtro,
         StockAdjustment.fecha_ajuste <= fin_filtro
